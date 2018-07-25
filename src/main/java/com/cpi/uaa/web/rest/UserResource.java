@@ -149,6 +149,21 @@ public class UserResource {
     }
 
     /**
+     * GET /users/containing : get all users by containing string.
+     *
+     * @param pageable the pagination information
+     * @param containing username containing string
+     * @return the ResponseEntity with status 200 (OK) and with body all users
+     */
+    @GetMapping("/users/containing")
+    @Timed
+    public ResponseEntity<List<UserDTO>> getAllUsersByContaining(Pageable pageable, String containing) {
+        final Page<UserDTO> page = userService.getAllManagedUsers(pageable, containing);
+        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/users/containing");
+        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    }
+
+    /**
      * @return a string list of the all of the roles
      */
     @GetMapping("/users/authorities")
