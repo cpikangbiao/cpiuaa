@@ -54,6 +54,10 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "last_name", length = 50)
     private String lastName;
 
+    @Size(max = 50)
+    @Column(name = "chinese_name", length = 50)
+    private String chineseName;
+
     @Email
     @Size(min = 5, max = 100)
     @Column(length = 100, unique = true)
@@ -133,6 +137,14 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getChineseName() {
+        return chineseName;
+    }
+
+    public void setChineseName(String chineseName) {
+        this.chineseName = chineseName;
     }
 
     public String getEmail() {

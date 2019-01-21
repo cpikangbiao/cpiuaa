@@ -137,7 +137,7 @@ public class UserService {
             user.setAuthorities(authorities);
         }
 //        String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
-        String encryptedPassword = passwordEncoder.encode("Cpi654321");
+        String encryptedPassword = passwordEncoder.encode("Cpi123456");
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
@@ -231,7 +231,12 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public Page<UserDTO> getAllManagedUsers(Pageable pageable, String username) {
-        return userRepository.findAllByLoginContaining(pageable, username).map(UserDTO::new);
+        if (username != null && username.length() > 0) {
+            return userRepository.findAllByLoginContaining(pageable, username).map(UserDTO::new);
+        } else {
+            return userRepository.findAllByLoginNot(pageable, Constants.ANONYMOUS_USER).map(UserDTO::new);
+        }
+
     }
 
     @Transactional(readOnly = true)
