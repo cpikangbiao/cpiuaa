@@ -1,5 +1,6 @@
 # cpiuaa
-This application was generated using JHipster 4.14.4, you can find documentation and help at [http://www.jhipster.tech/documentation-archive/v4.14.4](http://www.jhipster.tech/documentation-archive/v4.14.4).
+
+This application was generated using JHipster 6.1.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v6.1.0](https://www.jhipster.tech/documentation-archive/v6.1.0).
 
 This is a "uaa" application intended to be part of a microservice architecture, please refer to the [Doing microservices with JHipster][] page of the documentation for more information.
 
@@ -12,31 +13,61 @@ To start your application in the dev profile, simply run:
 
     ./mvnw
 
-
 For further instructions on how to develop with JHipster, have a look at [Using JHipster in development][].
-
-
 
 ## Building for production
 
-To optimize the cpiuaa application for production, run:
+### Packaging as jar
 
-    ./mvnw -Pprod clean package
+To build the final jar and optimize the cpiuaa application for production, run:
+
+    ./mvnw -Pprod clean verify
 
 To ensure everything worked, run:
 
-    java -jar target/*.war
-
+    java -jar target/*.jar
 
 Refer to [Using JHipster in production][] for more details.
+
+### Packaging as war
+
+To package your application as a war in order to deploy it to an application server, run:
+
+    ./mvnw -Pprod,war clean verify
 
 ## Testing
 
 To launch your application's tests, run:
 
-    ./mvnw clean test
+    ./mvnw verify
 
 For more information, refer to the [Running tests page][].
+
+### Code quality
+
+Sonar is used to analyse code quality. You can start a local Sonar server (accessible on http://localhost:9001) with:
+
+```
+docker-compose -f src/main/docker/sonar.yml up -d
+```
+
+You can run a Sonar analysis with using the [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner) or by using the maven plugin.
+
+Then, run a Sonar analysis:
+
+```
+./mvnw -Pprod clean verify sonar:sonar
+```
+
+If you need to re-run the Sonar phase, please be sure to specify at least the `initialize` phase since Sonar properties are loaded from the sonar-project.properties file.
+
+```
+./mvnw initialize sonar:sonar
+```
+
+or
+
+For more information, refer to the [Code quality page][].
 
 ## Using Docker to simplify development (optional)
 
@@ -53,7 +84,7 @@ To stop it and remove the container, run:
 You can also fully dockerize your application and all the services that it depends on.
 To achieve this, first build a docker image of your app by running:
 
-    ./mvnw verify -Pprod dockerfile:build
+    ./mvnw -Pprod verify jib:dockerBuild
 
 Then run:
 
@@ -65,14 +96,14 @@ For more information refer to [Using Docker and Docker-Compose][], this page als
 
 To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`), this will let you generate configuration files for a number of Continuous Integration systems. Consult the [Setting up Continuous Integration][] page for more information.
 
-[JHipster Homepage and latest documentation]: http://www.jhipster.tech
-[JHipster 4.14.4 archive]: http://www.jhipster.tech/documentation-archive/v4.14.4
-[Doing microservices with JHipster]: http://www.jhipster.tech/documentation-archive/v4.14.4/microservices-architecture/
-[Using UAA for Microservice Security]: http://www.jhipster.tech/documentation-archive/v4.14.4/using-uaa/[Using JHipster in development]: http://www.jhipster.tech/documentation-archive/v4.14.4/development/
-[Service Discovery and Configuration with the JHipster-Registry]: http://www.jhipster.tech/documentation-archive/v4.14.4/microservices-architecture/#jhipster-registry
-[Using Docker and Docker-Compose]: http://www.jhipster.tech/documentation-archive/v4.14.4/docker-compose
-[Using JHipster in production]: http://www.jhipster.tech/documentation-archive/v4.14.4/production/
-[Running tests page]: http://www.jhipster.tech/documentation-archive/v4.14.4/running-tests/
-[Setting up Continuous Integration]: http://www.jhipster.tech/documentation-archive/v4.14.4/setting-up-ci/
+[jhipster homepage and latest documentation]: https://www.jhipster.tech
+[jhipster 6.1.0 archive]: https://www.jhipster.tech/documentation-archive/v6.1.0
+[doing microservices with jhipster]: https://www.jhipster.tech/documentation-archive/v6.1.0/microservices-architecture/
 
-
+[Using UAA for Microservice Security]: https://www.jhipster.tech/documentation-archive/v6.1.0/using-uaa/[Using JHipster in development]: https://www.jhipster.tech/documentation-archive/v6.1.0/development/
+[Service Discovery and Configuration with the JHipster-Registry]: https://www.jhipster.tech/documentation-archive/v6.1.0/microservices-architecture/#jhipster-registry
+[Using Docker and Docker-Compose]: https://www.jhipster.tech/documentation-archive/v6.1.0/docker-compose
+[Using JHipster in production]: https://www.jhipster.tech/documentation-archive/v6.1.0/production/
+[Running tests page]: https://www.jhipster.tech/documentation-archive/v6.1.0/running-tests/
+[Code quality page]: https://www.jhipster.tech/documentation-archive/v6.1.0/code-quality/
+[Setting up Continuous Integration]: https://www.jhipster.tech/documentation-archive/v6.1.0/setting-up-ci/

@@ -4,7 +4,7 @@
       "packageName": "com.cpi.uaa",
       "nativeLanguage": "en"
     },
-    "jhipsterVersion": "4.14.4",
+    "jhipsterVersion": "6.1.0",
     "baseName": "cpiuaa",
     "packageName": "com.cpi.uaa",
     "packageFolder": "com/cpi/uaa",
@@ -33,6 +33,9 @@
       "zh-cn"
     ],
     "clientPackageManager": "yarn",
-    "skipClient": true
+    "skipClient": true,
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": []
   }
 }
