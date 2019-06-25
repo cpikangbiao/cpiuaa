@@ -13,6 +13,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -41,7 +42,7 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
     /**
      * Access tokens will not expire any earlier than this.
      */
-    private static final int MIN_ACCESS_TOKEN_VALDITIY_SECS = 60;
+    private static final int MIN_ACCESS_TOKEN_VALIDITY_SECS = 60;
 
     private ApplicationContext applicationContext;
 
@@ -87,7 +88,6 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/account/reset-password/init").permitAll()
                 .antMatchers("/api/account/reset-password/finish").permitAll()
-                .antMatchers("/api/profile-info").permitAll()
                 .antMatchers("/api/**").authenticated()
                 .antMatchers("/management/health").permitAll()
                 .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
@@ -106,15 +106,18 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
 
     private final UaaProperties uaaProperties;
 
-    public UaaConfiguration(JHipsterProperties jHipsterProperties, UaaProperties uaaProperties) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UaaConfiguration(JHipsterProperties jHipsterProperties, UaaProperties uaaProperties, PasswordEncoder passwordEncoder) {
         this.jHipsterProperties = jHipsterProperties;
         this.uaaProperties = uaaProperties;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         int accessTokenValidity = uaaProperties.getWebClientConfiguration().getAccessTokenValidityInSeconds();
-        accessTokenValidity = Math.max(accessTokenValidity, MIN_ACCESS_TOKEN_VALDITIY_SECS);
+        accessTokenValidity = Math.max(accessTokenValidity, MIN_ACCESS_TOKEN_VALIDITY_SECS);
         int refreshTokenValidity = uaaProperties.getWebClientConfiguration().getRefreshTokenValidityInSecondsForRememberMe();
         refreshTokenValidity = Math.max(refreshTokenValidity, accessTokenValidity);
         /*
@@ -122,7 +125,7 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
          */
         clients.inMemory()
             .withClient(uaaProperties.getWebClientConfiguration().getClientId())
-            .secret(uaaProperties.getWebClientConfiguration().getSecret())
+            .secret(passwordEncoder.encode(uaaProperties.getWebClientConfiguration().getSecret()))
             .scopes("openid")
             .autoApprove(true)
             .authorizedGrantTypes("implicit","refresh_token", "password", "authorization_code")
@@ -130,8 +133,9 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
             .refreshTokenValiditySeconds(refreshTokenValidity)
             .and()
             .withClient(jHipsterProperties.getSecurity().getClientAuthorization().getClientId())
-            .secret(jHipsterProperties.getSecurity().getClientAuthorization().getClientSecret())
+            .secret(passwordEncoder.encode(jHipsterProperties.getSecurity().getClientAuthorization().getClientSecret()))
             .scopes("web-app")
+            .authorities("ROLE_ADMIN")
             .autoApprove(true)
             .authorizedGrantTypes("client_credentials")
             .accessTokenValiditySeconds((int) jHipsterProperties.getSecurity().getAuthentication().getJwt().getTokenValidityInSeconds())
@@ -143,7 +147,7 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
         //pick up all  TokenEnhancers incl. those defined in the application
         //this avoids changes to this class if an application wants to add its own to the chain
         Collection<TokenEnhancer> tokenEnhancers = applicationContext.getBeansOfType(TokenEnhancer.class).values();
-        TokenEnhancerChain tokenEnhancerChain=new TokenEnhancerChain();
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
         tokenEnhancerChain.setTokenEnhancers(new ArrayList<>(tokenEnhancers));
         endpoints
             .authenticationManager(authenticationManager)
@@ -158,7 +162,7 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
 
     /**
      * Apply the token converter (and enhancer) for token store.
-     * @return the JwtTokenStore managing the tokens.
+     * @return the {@link JwtTokenStore} managing the tokens.
      */
     @Bean
     public JwtTokenStore tokenStore() {
@@ -166,10 +170,10 @@ public class UaaConfiguration extends AuthorizationServerConfigurerAdapter imple
     }
 
     /**
-     * This bean generates an token enhancer, which manages the exchange between JWT acces tokens and Authentication
+     * This bean generates an token enhancer, which manages the exchange between JWT access tokens and Authentication
      * in both directions.
      *
-     * @return an access token converter configured with the authorization server's public/private keys
+     * @return an access token converter configured with the authorization server's public/private keys.
      */
     @Bean
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
